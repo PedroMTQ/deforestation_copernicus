@@ -1,0 +1,22 @@
+
+services:
+
+  postgis:
+    container_name: postgis
+    image: postgis/postgis:16-master
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./data/postgres/data/:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "data"]
+      interval: 10s
+      timeout: 8s
+      retries: 5
+
+
+
