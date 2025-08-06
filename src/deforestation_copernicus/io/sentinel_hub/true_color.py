@@ -9,34 +9,40 @@ from sentinelhub import (
     CRS,
     MimeType,
     Geometry,
+    MosaickingOrder,
 )
 
 
-from deforestation_copernicus.core.utils.evalscripts import NVDI
+from deforestation_copernicus.core.utils.evalscripts import TRUE_COLOR
 from deforestation_copernicus.core.utils.config import CoppernicusConfig
 import cv2
 
 
-class NvdiFetcher():
+class TrueColorFetcher():
     def __init__(self, config: CoppernicusConfig):
         self.config = config
+        print(self.config.config.sh_client_id)
 
     def __get_from_api(self,
                        time_interval: tuple[str, str],
                        aoi_bbox: BBox,
                        aoi_size: tuple[int,int]):
-        return SentinelHubRequest(evalscript=NVDI,
-                                  input_data=[SentinelHubRequest.input_data(data_collection=DataCollection.SENTINEL2_L2A.define_from(name="s2l2a",
+        return SentinelHubRequest(evalscript=TRUE_COLOR,
+                                  input_data=[SentinelHubRequest.input_data(data_collection=DataCollection.SENTINEL2_L1C.define_from(name="s2l2a",
                                                                                                                                      service_url="https://sh.dataspace.copernicus.eu"),
-                                  time_interval=time_interval,
-                                  other_args={"dataFilter": {"mosaickingOrder": "leastCC"}},
-                                  )
+                                                                            time_interval=time_interval,
+                                                                            # least cloud coverage
+                                                                            mosaicking_order=MosaickingOrder.LEAST_CC,
+                                                                            other_args={"dataFilter": {"mosaickingOrder": "leastCC"}},
+                                                                            )
                                   ],
                                   responses=[SentinelHubRequest.output_response("default", MimeType.PNG)],
                                   bbox=aoi_bbox,
                                   size=aoi_size,
                                   config=self.config.config,
                               ).get_data()
+
+
     def run(self,
             time_interval: tuple[str, str],
             aoi_bbox: BBox,
@@ -54,12 +60,12 @@ if __name__ == '__main__':
 
 
 
-    fetcher = NvdiFetcher(config=CoppernicusConfig())
-    aoi_coords_wgs84 = [15.461282, 46.757161, 15.574922, 46.851514]
-    resolution = 10
+    fetcher = TrueColorFetcher(config=CoppernicusConfig())
+    aoi_coords_wgs84 = (46.16, -16.15, 46.51, -15.58)
+    resolution = 60
     aoi_bbox = BBox(bbox=aoi_coords_wgs84, crs=CRS.WGS84)
     aoi_size = bbox_to_dimensions(aoi_bbox, resolution=resolution)
-    results = fetcher.run(time_interval= ('2025-01-12', '2025-01-14'),
+    results = fetcher.run(time_interval= ("2020-06-12", "2020-06-13"),
                                           aoi_bbox=aoi_bbox,
                                           aoi_size=aoi_size)
     print(results)
