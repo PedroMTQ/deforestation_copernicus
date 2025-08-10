@@ -1,7 +1,7 @@
 import logging
 import sys
-from deforestation_copernicus.settings import SERVICE_NAME, DEBUG, LOGGER_PATH
 
+from deforestation_copernicus.settings import DEBUG, LOGGER_PATH, SERVICE_NAME
 
 logger = logging.getLogger(SERVICE_NAME)
 """Logger object configured for this project/service"""

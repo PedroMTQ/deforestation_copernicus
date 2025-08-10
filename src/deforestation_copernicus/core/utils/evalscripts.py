@@ -15,12 +15,12 @@ function setup() {
     }
   }
 }
-  
+
 
 function evaluatePixel(sample) {
     let val = (sample.B08 - sample.B04) / (sample.B08 + sample.B04);
     let imgVals = null;
-    
+
     if (val<-1.1) imgVals = [0,0,0];
     else if (val<-0.2) imgVals = [0.75,0.75,0.75];
     else if (val<-0.1) imgVals = [0.86,0.86,0.86];
@@ -42,10 +42,8 @@ function evaluatePixel(sample) {
     else if (val<0.55) imgVals = [0.13,0.38,0.07];
     else if (val<0.6) imgVals = [0.06,0.33,0.04];
     else imgVals = [0,0.27,0];
-    
-    
+
     imgVals.push(sample.dataMask)
-    
     return imgVals
 }
 """

@@ -10,10 +10,12 @@ dependencies = [
     "ruff",
     "uuid6",
     "sentinelhub",
+    "rasterio",
     "SQLAlchemy>=2.0",
     "GeoAlchemy2",
     "opencv-python",
     "pillow",
+    "matplotlib",
     "psycopg[binary, pool]",  
 ]
 

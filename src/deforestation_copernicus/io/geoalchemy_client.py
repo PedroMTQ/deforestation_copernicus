@@ -1,14 +1,22 @@
-from deforestation_copernicus.settings import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from typing import Any
-from dataclasses import dataclass
+from datetime import datetime
 from typing import Iterable
 
-from deforestation_copernicus.io.data_models import SentinelHubResult
 import psycopg
+from geoalchemy2.functions import ST_Intersects
+from geoalchemy2.shape import from_shape
+from shapely.geometry import Polygon
+from sqlalchemy import and_, create_engine
+from sqlalchemy.orm import sessionmaker
+
+from deforestation_copernicus.io.data_models import SentinelHubResult
 from deforestation_copernicus.io.logger import logger
-import os
+from deforestation_copernicus.settings import (
+    POSTGRES_DB,
+    POSTGRES_HOST,
+    POSTGRES_PASSWORD,
+    POSTGRES_PORT,
+    POSTGRES_USER,
+)
 
 CONNECTION_TIMEOUT = 10
 
@@ -59,11 +67,26 @@ class GeoAlchemyClient():
         session.add_all(data)
         session.commit()
 
-    def get(self):
+    def get(self,
+            polygon: Polygon,
+            resolution: int,
+            timestamp_start: datetime,
+            timestamp_end: datetime,
+            ) -> Iterable[SentinelHubResult]:
         session = self.session_class()
-        results = session.query(SentinelHubResult).order_by(SentinelHubResult.id)
-        for i in results:
-            print(i)
+        geometry = from_shape(polygon, srid=4326)
+        results = session.query(SentinelHubResult).filter(
+        and_(
+            SentinelHubResult.resolution == resolution,
+            SentinelHubResult.timestamp_start >= timestamp_start,
+            SentinelHubResult.timestamp_end <= timestamp_end,
+            ST_Intersects(SentinelHubResult.geometry, geometry)
+        )
+        ).all()
+        res = []
+        for result in results:
+            res.append(result)
+        return res
 
 if __name__ == '__main__':
     client = GeoAlchemyClient()

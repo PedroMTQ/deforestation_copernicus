@@ -1,21 +1,16 @@
+import cv2
 from sentinelhub import (
-    SHConfig,
-    DataCollection,
-    SentinelHubCatalog,
-    SentinelHubRequest,
-    SentinelHubStatistical,
-    BBox,
-    bbox_to_dimensions,
     CRS,
+    BBox,
+    DataCollection,
     MimeType,
-    Geometry,
     MosaickingOrder,
+    SentinelHubRequest,
+    bbox_to_dimensions,
 )
 
-
-from deforestation_copernicus.core.utils.evalscripts import TRUE_COLOR
 from deforestation_copernicus.core.utils.config import CoppernicusConfig
-import cv2
+from deforestation_copernicus.core.utils.evalscripts import TRUE_COLOR
 
 
 class TrueColorFetcher():
@@ -54,7 +49,6 @@ class TrueColorFetcher():
         return api_results
 
 if __name__ == '__main__':
-    import numpy as np
     import cv2
     from PIL import Image
 

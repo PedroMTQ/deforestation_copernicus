@@ -1,27 +1,26 @@
-from sentinelhub import (
-    SHConfig,
-    DataCollection,
-    SentinelHubCatalog,
-    SentinelHubRequest,
-    SentinelHubStatistical,
-    BBox,
-    bbox_to_dimensions,
-    CRS,
-    MimeType,
-    Geometry,
-)
-from pathlib import Path
-
-from deforestation_copernicus.core.utils.evalscripts import NVDI
-from deforestation_copernicus.core.utils.config import CoppernicusConfig
-from deforestation_copernicus.settings import DATA
-import cv2
 import os
-from deforestation_copernicus.io.data_models import SentinelHubResult
-from geoalchemy2.shape import from_shape
 from datetime import datetime
-from shapely.geometry import Polygon
+from pathlib import Path
 from typing import Iterable
+
+from geoalchemy2.elements import WKBElement
+from geoalchemy2.shape import from_shape
+from sentinelhub import (
+    CRS,
+    BBox,
+    DataCollection,
+    MimeType,
+    SentinelHubRequest,
+    bbox_to_dimensions,
+)
+
+from deforestation_copernicus.core.utils.config import CoppernicusConfig
+from deforestation_copernicus.core.utils.evalscripts import NVDI
+from deforestation_copernicus.core.utils.utils import get_polygon
+from deforestation_copernicus.io.data_models import SentinelHubResult
+from deforestation_copernicus.io.logger import logger
+from deforestation_copernicus.settings import DATA
+
 
 class NvdiFetcher():
     IMAGE_TYPE = 'nvdi'
@@ -55,26 +54,19 @@ class NvdiFetcher():
         '''
         gets image path from db if it exists, otherwise queries copernicus and stores all in DB
         '''
+        logger.debug(f'Fetching {self.IMAGE_TYPE} data for coordinates {coordinates_wgs84} from {timestamp_start} to {timestamp_end} (resolution: {resolution})')
         aoi_bbox = BBox(bbox=coordinates_wgs84, crs=CRS.WGS84)
         aoi_size = bbox_to_dimensions(aoi_bbox, resolution=resolution)
         sentinel_hub_request = self.__get_from_api(time_interval=(timestamp_start, timestamp_end), aoi_bbox=aoi_bbox, aoi_size=aoi_size)
         file_name_list = sentinel_hub_request.get_filename_list()
-        data_list = sentinel_hub_request.get_data(save_data=True)
-        x_min, y_min, x_max, y_max = aoi_bbox
-        shapely_polygon = Polygon([
-                                    (x_min, y_min),
-                                    (x_max, y_min),
-                                    (x_max, y_max),
-                                    (x_min, y_max),
-                                    (x_min, y_min)
-                                ])
-        for data_idx, _ in enumerate(data_list):
+        polygon = get_polygon(coordinates_wgs84=coordinates_wgs84)
+        geometry: WKBElement = from_shape(polygon, srid=4326)
+        # ! get_data saves the data to disk
+        for data_idx, _ in enumerate(sentinel_hub_request.get_data(save_data=True)):
             file_name = file_name_list[data_idx]
             srid = str(Path(file_name).parent)
-            geometry =  from_shape(shapely_polygon, srid=4326)
             image_type = self.IMAGE_TYPE
             image_path = os.path.join(self.DATA_FOLDER, file_name)
-            print(srid, geometry, image_type, image_path)
             yield SentinelHubResult(srid=srid,
                                     resolution=resolution,
                                     timestamp_start=timestamp_start,
@@ -96,4 +88,3 @@ if __name__ == '__main__':
                           )
     for i in results:
         print(i.image_path)
-  

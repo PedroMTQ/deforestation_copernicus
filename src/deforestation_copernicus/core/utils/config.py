@@ -1,6 +1,6 @@
-from sentinelhub import SHConfig
-
 import os
+
+from sentinelhub import SHConfig
 
 SH_CLIENT_ID = os.getenv('SH_CLIENT_ID')
 SH_CLIENT_SECRET = os.getenv('SH_CLIENT_SECRET')
