@@ -7,9 +7,18 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Iterable
 
-def get_polygon(coordinates_wgs84: tuple) -> Polygon:
-    aoi_bbox = BBox(bbox=coordinates_wgs84, crs=CRS.WGS84)
-    x_min, y_min, x_max, y_max = aoi_bbox
+def get_polygon(min_longitude: float=None,
+                max_longitude: float=None,
+                min_latitude: float=None,
+                max_latitude: float=None,
+                bbox: BBox=None) -> Polygon:
+    if not bbox:
+        bbox = BBox(bbox={'min_x': min_longitude,
+                          'max_x': max_longitude,
+                          'min_y': min_latitude,
+                          'max_y': max_latitude},
+                              crs=CRS.WGS84)
+    x_min, y_min, x_max, y_max = bbox
     return Polygon([
                     (x_min, y_min),
                     (x_max, y_min),

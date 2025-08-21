@@ -1,16 +1,13 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from sentinelhub import (
-    CRS,
-    BBox,
-    bbox_to_dimensions)
 from typing import Literal
+from deforestation_copernicus.core.data_models.base import BaseDataModel
 
 DATE_FORMAT = '%Y-%m-%d'
 AVAILABLE_IMAGE_TYPES = Literal['nvdi', 'true_color']
 
 @dataclass
-class DownloadRequestBoundingBoxWGS84():
+class DownloadRequest(BaseDataModel):
     min_longitude: float
     max_longitude: float
     min_latitude: float
@@ -21,9 +18,7 @@ class DownloadRequestBoundingBoxWGS84():
     image_type: AVAILABLE_IMAGE_TYPES
 
 
-    def to_dict(self) -> dict:
-        return asdict(self)
 
 
 if __name__ == '__main__':
-    request_fields = DownloadRequestBoundingBoxWGS84.fields()
+    request_fields = DownloadRequest.fields()

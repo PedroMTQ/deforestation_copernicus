@@ -1,4 +1,5 @@
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field
+import os
 from datetime import datetime
 from sentinelhub import (
     CRS,
@@ -7,12 +8,13 @@ from sentinelhub import (
 from typing import Literal
 from deforestation_copernicus.settings import PARTITION_GEOHASH_LEVEL
 import pygeohash
+from deforestation_copernicus.core.data_models.base import BaseDataModel
 
 DATE_FORMAT = '%Y-%m-%d'
 AVAILABLE_IMAGE_TYPES = Literal['nvdi', 'true_color']
 
 @dataclass
-class SatelliteData():
+class SatelliteData(BaseDataModel):
     min_longitude: float
     max_longitude: float
     min_latitude: float
@@ -22,10 +24,11 @@ class SatelliteData():
     timestamp_end: datetime
     image_type: AVAILABLE_IMAGE_TYPES
     bounding_box: BBox = field(default=None, repr=False)
-    dimensions: tuple = field(default=None)
-    tiff_path: str = field(default=None)
-    cog_image: str = field(default=None)
-    geohash: str = field(default=None)
+    dimensions: tuple = field(default=None, repr=False)
+    tiff_path: str = field(default=None, repr=False)
+    cog_image: str = field(default=None, repr=False)
+    geohash: str = field(default=None, repr=False)
+    status: Literal['']
 
     def get_center(self) -> dict:
         center_longitude = (self.min_longitude + self.max_longitude) / 2
@@ -47,4 +50,8 @@ class SatelliteData():
                                             longitude=bounding_box_center['longitude'],
                                             precision=PARTITION_GEOHASH_LEVEL)
 
+    def get_minio_path(self):
+        return os.path.join(self.geohash,
+                            f'{self.timestamp_start}__{self.timestamp_end}',
+                            f'bounding_box__{self.min_longitude}__{self.min_latitude}__{self.max_longitude}__{self.max_latitude}')
 

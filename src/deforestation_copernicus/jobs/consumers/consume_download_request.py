@@ -1,9 +1,9 @@
-from kafka_deltalake_minio.core.kafka_to_delta_consumer import KafkaToDeltaConsumer
+from deforestation_copernicus.core.satellite_data_download.download_request_consumer import DownloadRequestConsumer
 
 
 class KafkaToDeltaJob():
     def start_service(self):
-        consumer = KafkaToDeltaConsumer()
+        consumer = DownloadRequestConsumer()
         while True:
             consumer.run()
 

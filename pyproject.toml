@@ -28,6 +28,8 @@ dependencies = [
     "ruff",
     "pygeohash",
     "rio-cogeo",
+    "minio",
+
     
 ]
 

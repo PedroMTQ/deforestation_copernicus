@@ -143,10 +143,18 @@ Uses a model do detect deforestation over time
 
 ✅ **Tool roles in your system:**
 
+Messaging:
 * **Kafka** → ingestion buffer.
-* **Delta Lake** → scalable, versioned storage for raw + processed data.
+Satellite data ingestion and downstream modelling:
 * **PostGIS** → spatial querying/indexing for apps.
+
+Sensor data ingestion and downstream modelling:
+* **Delta Lake** → scalable, versioned storage for raw + processed data.
+
+Sensor data processing: (and downstream modelling?)
 * **Spark** → large-scale processing + ML.
+
+Donstream modelling:
 * **dbt** → SQL-based curation of structured metadata.
 * **DVC** → ML reproducibility (datasets + models).
 
@@ -155,10 +163,21 @@ Uses a model do detect deforestation over time
 Use rio-cogeo to convert satellite data into queriable COG (for proper selection of images)
 
 Workflow:
-- Some service sends a download request to kafka
-- A kafka consumer downloads satellite data and saves it in minio (partition by geohash lvl X and timestamp e.g., sentinel_hub/sentinel_hub_function/geohash/timestamp/bounding_box_<minx>_<miny>_<maxx>_<maxy>/image.<tiff/cog>), publish a message with path to kafka 
-- A kafka consumer pushes to delta table
-- A kafka consumer saves images to minio
-- A service syncs from delta table to postgis
-- Have a consumer saving data into postgis and another saving images to minio
-- Spark workers to convert raw images using rio-cogeo to COGs
+Satellite data:
+  1. Satellite data download request pusher sends a download request to kafka
+  2. Satellite data request consumer downloads satellite data and:
+      2.1 checks if the data is available in minio, if so the request is dropped
+      2.2 if not, it sends the request to another kafka topic (downloader)
+  3. A consumer reads for the downloader kafka topic and downloads satellite data and saves it in minio (partition by geohash lvl X and timestamp e.g., sentinel_hub/sentinel_hub_function/geohash/timestamp/bounding_box_<minx>_<miny>_<maxx>_<maxy>/image.<tiff/cog>) as COG (using rio-cogeo), publish a message with path to kafka
+  3. Satellite data postgis consumer adds data to postgis
+
+Sensor data:
+1. Sensor data pusher sends sensor data to kafka
+2. Sensor data consumer adds sensor data to delta table (raw) and pushes sensor data to spark
+3. Spark workers process sensor data and add processed data to delta table (processed)
+
+
+# Guides
+
+Fine-tuning pixtral for sat data:
+https://github.com/mistralai/cookbook/blob/main/mistral/fine_tune/pixtral_finetune_on_satellite_data.ipynb

@@ -1,5 +1,6 @@
 from deforestation_copernicus.core.messages.download_request import DownloadRequestBoundingBoxWGS84
-from deforestation_copernicus.core.download_request_pusher import DownloadRequestPusher
+from deforestation_copernicus.core.satellite_data_download.download_request import DownloadRequestBoundingBoxWGS84
+from deforestation_copernicus.core.satellite_data_download.download_request_pusher import DownloadRequestPusher
 from deforestation_copernicus.io.logger import logger
 from datetime import datetime
 
@@ -15,7 +16,7 @@ class PushDownloadRequestJob():
         logger.info(f'Submitted {requests} to Kafka')
 
 if __name__ == '__main__':
-    requests = [DownloadRequestBoundingBoxWGS84(min_longitude=46.16, 
+    requests = [DownloadRequestBoundingBoxWGS84(min_longitude=46.16,
                                                 max_longitude=46.51,
                                                 min_latitude=-16.15,
                                                 max_latitude=-15.58,
