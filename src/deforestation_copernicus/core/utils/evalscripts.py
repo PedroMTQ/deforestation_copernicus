@@ -49,7 +49,7 @@ function evaluatePixel(sample) {
 """
 
 
-TRUE_COLOR = """
+TRUE_COLOR_OLD = """
     //VERSION=3
 
     function setup() {
@@ -66,4 +66,29 @@ TRUE_COLOR = """
     function evaluatePixel(sample) {
         return [sample.B04, sample.B03, sample.B02];
     }
+"""
+
+
+TRUE_COLOR = """
+    //VERSION=3
+
+function setup() {
+    return {
+        input: [{ bands: ["B02","B03","B04"] }],
+        output: { bands: 3 }
+    };
+}
+
+function evaluatePixel(sample) {
+    let r = sample.B04 / 3000;
+    let g = sample.B03 / 3000;
+    let b = sample.B02 / 3000;
+
+    // Clip between 0 and 1
+    r = Math.min(1.0, Math.max(0.0, r));
+    g = Math.min(1.0, Math.max(0.0, g));
+    b = Math.min(1.0, Math.max(0.0, b));
+
+    return [r, g, b];
+}
 """

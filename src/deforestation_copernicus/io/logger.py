@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from deforestation_copernicus.settings import DEBUG, LOGGER_PATH, SERVICE_NAME
+from deforestation_copernicus.settings import DEBUG, LOGGER_PATH, SERVICE_NAME, __VERSION__
 
 logger = logging.getLogger(SERVICE_NAME)
 """Logger object configured for this project/service"""
@@ -26,5 +26,8 @@ if LOGGER_PATH:
 
 
 logger.addHandler(local_handler)
+
+if __VERSION__:
+    logger.info(f'Deployed {SERVICE_NAME}:{__VERSION__}')
 
 

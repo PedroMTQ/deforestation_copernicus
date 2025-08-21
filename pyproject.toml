@@ -16,7 +16,21 @@ dependencies = [
     "opencv-python",
     "pillow",
     "matplotlib",
-    "psycopg[binary, pool]",  
+    "psycopg[binary, pool]",
+
+    "deltalake",
+    "boto3",
+    "s3fs",
+    "uuid6",
+    "polars",
+    "kafka-python",
+    "faker",
+    "ruff",
+    "pygeohash",
+    "rio-cogeo",
+    "minio",
+
+    
 ]
 
 

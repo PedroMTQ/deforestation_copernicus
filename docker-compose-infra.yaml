@@ -4,6 +4,8 @@ services:
   postgis:
     container_name: postgis
     image: postgis/postgis:latest
+    networks:
+      - geo-network
     ports:
       - 5432:5432
     environment:
@@ -25,3 +27,94 @@ services:
 
 
 
+  minio:
+      image: quay.io/minio/minio:RELEASE.2025-01-20T14-49-07Z
+      container_name: minio
+      environment:
+        - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+        - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      command: server /data --console-address ":9001"
+      networks:
+        - geo-network
+      ports:
+        - "${MINIO_S3_PORT}:9000" # S3 API
+        - "9001:9001" # Web UI
+      volumes:
+        - ./data/minio/data/:/data
+      healthcheck:
+        test: ["CMD", "mc", "ready", "local"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+  minio-init:
+    image: quay.io/minio/minio:RELEASE.2025-01-20T14-49-07Z
+    container_name: minio-init
+    networks:
+      - geo-network
+    environment:
+      MINIO_BUCKETS: ${MINIO_BUCKETS}
+      MINIO_ALIAS: "minio"
+      MINIO_URL: "http://minio:${MINIO_S3_PORT}"
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./create-buckets.sh:/minio_init/create-buckets.sh
+      - ./data/minio/data/:/data
+    entrypoint: ["/bin/sh", "/minio_init/create-buckets.sh"]
+
+
+
+  broker:
+    hostname: broker
+    image: apache/kafka:latest
+    container_name: kafka-broker
+    networks:
+      - geo-network
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER_INTERNAL:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: DOCKER_INTERNAL://broker:29092,HOST://localhost:9092
+      KAFKA_LISTENERS: DOCKER_INTERNAL://broker:29092,HOST://0.0.0.0:9092,CONTROLLER://broker:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9093:9093"
+    volumes:
+      - ./data/kafka/data/:/var/lib/kafka/data
+    restart: unless-stopped
+
+
+
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    networks:
+      - geo-network
+    depends_on:
+      - broker
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:29092
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+
+
+
+networks:
+  geo-network:
+    name: geo-network
+    driver: bridge
