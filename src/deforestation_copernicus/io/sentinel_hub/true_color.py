@@ -33,7 +33,7 @@ class TrueColorFetcher():
                                   bbox=aoi_bbox,
                                   size=aoi_size,
                                   config=config.config,
-                              ).get_data()
+                              )
 
 
 

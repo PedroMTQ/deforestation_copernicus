@@ -1,14 +1,13 @@
 from abc import abstractmethod
 from typing import Optional
-from kafka_deltalake_minio.io.logger import logger
+from deforestation_copernicus.io.logger import logger
+from deforestation_copernicus.core.utils.utils import deserializer
+from deforestation_copernicus.settings import KAFKA_BROKER
 
 from kafka import KafkaConsumer
 
-from kafka_deltalake_minio.core.utils import deserializer
-from kafka_deltalake_minio.settings import KAFKA_BROKER
 
-
-class BaseConsumer(KafkaConsumer):
+class BaseConsumer():
     def __init__(self,
                  topics: list[str],
                  consumer_timeout_ms: int,

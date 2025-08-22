@@ -1,12 +1,12 @@
-from deforestation_copernicus.core.satellite_data_download.download_request_consumer import DownloadRequestConsumer
+from deforestation_copernicus.core.services.satellite_data.download_request_consumer import DownloadRequestConsumer
 
 
-class KafkaToDeltaJob():
+class Job():
     def start_service(self):
         consumer = DownloadRequestConsumer()
         while True:
             consumer.run()
 
 if __name__ == '__main__':
-    test = KafkaToDeltaJob()
+    test = Job()
     test.start_service()

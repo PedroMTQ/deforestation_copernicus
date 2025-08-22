@@ -28,7 +28,6 @@ class SatelliteData(BaseDataModel):
     tiff_path: str = field(default=None, repr=False)
     cog_image: str = field(default=None, repr=False)
     geohash: str = field(default=None, repr=False)
-    status: Literal['']
 
     def get_center(self) -> dict:
         center_longitude = (self.min_longitude + self.max_longitude) / 2
@@ -49,6 +48,10 @@ class SatelliteData(BaseDataModel):
             self.geohash = pygeohash.encode(latitude=bounding_box_center['latitude'],
                                             longitude=bounding_box_center['longitude'],
                                             precision=PARTITION_GEOHASH_LEVEL)
+        if isinstance(self.timestamp_start, str):
+            self.timestamp_start = datetime.fromisoformat(self.timestamp_start)
+        if isinstance(self.timestamp_end, str):
+            self.timestamp_end = datetime.fromisoformat(self.timestamp_end)
 
     def get_minio_path(self):
         return os.path.join(self.geohash,

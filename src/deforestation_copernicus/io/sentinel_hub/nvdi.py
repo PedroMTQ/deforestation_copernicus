@@ -17,7 +17,7 @@ from sentinelhub import (
 from deforestation_copernicus.core.utils.config import CoppernicusConfig
 from deforestation_copernicus.core.utils.evalscripts import NVDI
 from deforestation_copernicus.core.utils.utils import get_polygon
-from deforestation_copernicus.io.data_models import SentinelHubResult
+from deforestation_copernicus.core.data_models.sentinel_hub_result import SentinelHubResult
 from deforestation_copernicus.io.logger import logger
 from deforestation_copernicus.settings import DATA
 

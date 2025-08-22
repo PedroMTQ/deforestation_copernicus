@@ -6,6 +6,11 @@ from shapely.geometry import Polygon
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Iterable
+from rio_cogeo.cogeo import cog_translate
+from rio_cogeo.profiles import cog_profiles
+
+COG_PROFILE = cog_profiles.get("deflate")
+COG_PROFILE.update({"crs": "EPSG:4326"})
 
 def get_polygon(min_longitude: float=None,
                 max_longitude: float=None,
@@ -66,3 +71,17 @@ class DateTimeEncoder(json.JSONEncoder):
 
 def get_table_delta_uri(delta_bucket: str, delta_table: str) -> str:
     return f's3a://{delta_bucket}/{delta_table}'
+
+
+def create_cog(input_path: str,
+               output_path: str,
+               additional_cog_metadata: dict={},
+               add_mask: bool=True,
+               ):
+    cog_translate(
+        source=input_path,
+        dst_path=output_path,
+        dst_kwargs = COG_PROFILE,
+        add_mask=add_mask,
+        additional_cog_metadata=additional_cog_metadata,
+    )

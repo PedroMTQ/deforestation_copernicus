@@ -18,7 +18,7 @@ from deforestation_copernicus.io.sentinel_hub.true_color import TrueColorFetcher
 from deforestation_copernicus.core.utils.config import CoppernicusConfig
 from deforestation_copernicus.core.utils.utils import get_polygon
 from deforestation_copernicus.core.data_models.satellite_data import SatelliteData
-from deforestation_copernicus.io.data_models import SentinelHubResult
+from deforestation_copernicus.core.data_models.sentinel_hub_result import SentinelHubResult
 from deforestation_copernicus.io.logger import logger
 import tempfile
 
@@ -50,10 +50,7 @@ class SentinelHubFetcher():
         gets image path from db if it exists, otherwise queries copernicus and stores all in DB
         '''
         logger.debug(f'Fetching data for {satellite_data})')
-        sentinel_hub_request = self.__get_from_api(time_interval=(satellite_data.timestamp_start,
-                                                                  satellite_data.timestamp_end),
-                                                                  aoi_bbox=satellite_data.bounding_box,
-                                                                  aoi_size=satellite_data.dimensions)
+        sentinel_hub_request = self._get_from_api(satellite_data)
         file_name_list = sentinel_hub_request.get_filename_list()
         minio_path = satellite_data.get_minio_path()
         polygon = get_polygon(bbox=satellite_data.bounding_box)

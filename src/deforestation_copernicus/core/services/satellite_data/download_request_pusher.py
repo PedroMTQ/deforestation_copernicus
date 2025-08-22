@@ -1,5 +1,5 @@
 from deforestation_copernicus.core.data_models.download_request import DownloadRequest
-from deforestation_copernicus.io.base_kafka_producer import BaseProducer
+from deforestation_copernicus.io.kafka.base_producer import BaseProducer
 from deforestation_copernicus.io.logger import logger
 from deforestation_copernicus.settings import KAFKA_TOPIC__SATELLITE_DOWNLOAD_REQUESTS
 
