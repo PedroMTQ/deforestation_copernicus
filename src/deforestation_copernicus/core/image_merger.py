@@ -1,6 +1,6 @@
 from sentinelhub import CRS
 
-from deforestation_copernicus.io.data_models import SentinelHubResult
+from deforestation_copernicus.core.data_models.sentinel_hub_result import SentinelHubResult
 
 
 class ImageMerger():

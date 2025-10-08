@@ -8,7 +8,7 @@ from shapely.geometry import Polygon
 from sqlalchemy import and_, create_engine
 from sqlalchemy.orm import sessionmaker
 
-from deforestation_copernicus.io.data_models import SentinelHubResult
+from deforestation_copernicus.core.data_models.sentinel_hub_result import SentinelHubResult
 from deforestation_copernicus.io.logger import logger
 from deforestation_copernicus.settings import (
     POSTGRES_DB,
